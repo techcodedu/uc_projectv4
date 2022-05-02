@@ -21,7 +21,7 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 
-function EditProfile() {
+function ChangeItem() {
   //   const initialState = {
   //     userFirstname: "",
   //     userLastname: "",
@@ -118,7 +118,7 @@ function EditProfile() {
   };
 
   //for save changes
-  const handleProfile = async (e) => {
+  const handleItemChange = async (e) => {
     // e.preventDefault();
     // if (id) {
     //   try {
@@ -137,7 +137,7 @@ function EditProfile() {
       <Navigation />
       <Container>
         <h2>Edit Profile</h2>
-        <Form onSubmit={handleProfile}>
+        <Form onSubmit={handleItemChange}>
           <Form.Group className="mb-3">
             <Form.Label>Cashiers Name</Form.Label>
             <Form.Control
@@ -187,4 +187,4 @@ function EditProfile() {
   );
 }
 
-export default EditProfile;
+export default ChangeItem;
