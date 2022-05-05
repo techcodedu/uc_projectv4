@@ -3,11 +3,10 @@ import Navigation from "../components/navigation";
 import { Container, Badge, Button, Modal, Row, Col } from "react-bootstrap";
 import { db } from "../firebase.config";
 import { useNavigate } from "react-router-dom";
-import { collectionGroup, doc, onSnapshot } from "firebase/firestore";
+import { collectionGroup, onSnapshot } from "firebase/firestore";
 import BootstrapTable from "react-bootstrap-table-next";
 import pagination from "react-bootstrap-table2-paginator";
 import { Link } from "react-router-dom";
-import { Image } from "react-bootstrap-icons";
 
 // import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 

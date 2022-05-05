@@ -6,6 +6,7 @@ import Items from "./pages/Items";
 import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
 import ChangeItem from "./pages/ChangeItem";
+import "antd/dist/antd.css";
 import "./index.css";
 
 function App() {

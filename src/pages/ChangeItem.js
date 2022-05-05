@@ -2,18 +2,18 @@ import React, { useEffect, useState } from "react";
 import Navigation from "../components/navigation";
 import { useNavigate, useParams } from "react-router-dom";
 import { Container, Form, Button } from "react-bootstrap";
-
+import { useAuthState } from "react-firebase-hooks/auth";
 import {
   collectionGroup,
   doc,
-  getDoc,
   getDocs,
   query,
+  runTransaction,
   serverTimestamp,
   updateDoc,
   where,
 } from "firebase/firestore";
-import { db } from "../firebase.config";
+import { auth, db } from "../firebase.config";
 import {
   getStorage,
   ref,
@@ -21,58 +21,41 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 
-function EditProfile() {
-  //   const initialState = {
-  //     userFirstname: "",
-  //     userLastname: "",
-  //     userPhoneNumber: "",
-  //   };
+function ChangeItem() {
+  const initialState = {
+    itemName: "",
+    itemCost: "",
+    itemQuantity: "",
+  };
 
-  //   const [data, setData] = useState(initialState);
-  //   const { userFirstname, userLastname, userPhoneNumber } = data;
+  const [data, setData] = useState(initialState);
+  const { itemName, itemCost, itemQuantity } = data;
   const { id } = useParams();
   const navigate = useNavigate();
+  const [user] = useAuthState(auth);
 
   const [isSubmit, setIsSubmit] = useState(false);
 
   const [file, setFile] = useState(null);
   const [progress, setProgress] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const [details, setDetails] = useState([]);
+  //fetch details data from Item Groups
+  useEffect(() => {
+    id && fetchItemDetails();
+  }, [id]);
 
-  const fetchItem = async () => {
-    const q = query(
+  //query snapshot from Item collection
+  const fetchItemDetails = async () => {
+    const item = query(
       collectionGroup(db, "Items"),
       where("itemBarcode", "==", id)
     );
-    const querySnapshot = await getDocs(q);
-    const data = querySnapshot.docs.map((doc) => ({
-      // doc.data() is never undefined for query doc snapshots
-      ...doc.data(),
-      id: doc.id,
-    }));
-    setDetails(data);
+    const querySnapshot = await getDocs(item);
+    querySnapshot.forEach((doc) => {
+      setData({ ...doc.data() });
+    });
   };
-
-  console.log(details);
-
-  useEffect(() => {
-    fetchItem();
-  }, []);
-
-  //fetch user data from profile
-  //   useEffect(() => {
-  //     id && fetchUserProfile();
-  //   }, [id]);
-
-  //   //query snapshot from Users collection
-  //   const fetchUserProfile = async () => {
-  //     const docRef = doc(db, "Users", id);
-  //     const snapshot = await getDoc(docRef);
-  //     if (snapshot.exists()) {
-  //       setData({ ...snapshot.data() });
-  //     }
-  //   };
 
   //profile image upload useffect
   useEffect(() => {
@@ -105,7 +88,7 @@ function EditProfile() {
         },
         () => {
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            // setData((prev) => ({ ...prev, userProfile: downloadURL }));
+            setData((prev) => ({ ...prev, userProfile: downloadURL }));
           });
         }
       );
@@ -114,50 +97,127 @@ function EditProfile() {
   }, [file]);
 
   const handleInputChange = (e) => {
-    // setData({ ...data, [e.target.name]: e.target.value });
+    setData({ ...data, [e.target.name]: e.target.value });
   };
 
   //for save changes
-  const handleProfile = async (e) => {
-    // e.preventDefault();
-    // if (id) {
-    //   try {
-    //     await updateDoc(doc(db, "Users", id), {
-    //       ...data,
-    //       timestamp: serverTimestamp(),
-    //     });
-    //   } catch (error) {
-    //     console.log(error);
-    //   }
+  const handleItemSave = async (e) => {
+    e.preventDefault();
+    if (id) {
+      try {
+        const sfDocRef = doc(db, "Items", id);
+        await runTransaction(db, async (transaction) => {
+          const sfDoc = await transaction.get(sfDocRef);
+          if (!sfDoc.exists()) {
+            throw "Document does not exist!";
+          }
+
+          const newPopulation = sfDoc.data().population + 1;
+          transaction.update(sfDocRef, { ...data });
+        });
+        console.log("Transaction successfully committed!");
+      } catch (e) {
+        console.log("Transaction failed: ", e);
+      }
+    }
+
+    navigate("/items");
+
+    // try {
+    //   const sfDocRef = doc(db, "Users", user?.uid, "Items", id);
+    //   await runTransaction(db, async (transaction) => {
+    //     const sfDoc = await transaction.get(sfDocRef);
+    //     if (!sfDoc.exists()) {
+    //       throw "Document does not exist!";
+    //     }
+
+    //     const newPopulation = sfDoc.data().population + 1;
+    //     transaction.update(sfDocRef, { ...data });
+    //   });
+    //   console.log("Transaction successfully committed!");
+    // } catch (e) {
+    //   console.log("Transaction failed: ", e);
     // }
-    // navigate("/profile");
+    // try {
+    //   const ref = doc(db, "Items", id);
+    //   // Set the "capital" field of the city 'DC'
+    //   return ref
+    //     .updateDoc({
+    //       ...data,
+    //     })
+    //     .then(() => {
+    //       console.log("Document successfully updated!");
+    //     })
+    //     .catch((error) => {
+    //       // The document probably doesn't exist.
+    //       console.error("Error updating document: ", error);
+    //     });
+    // } catch (error) {}
+    // try {
+    //   const ref = doc(db, "Items", id);
+    //   await updateDoc(ref, {
+    //     ...data,
+    //   }).then(() => {
+    //     console.log("Document successfully updated!");
+    //   });
+    // } catch (error) {
+    //   console.log("error");
+    // }
   };
+  // if (id) {
+  //   try {
+  //     await updateDoc(doc(db, "Items", id), {
+  //       ...data,
+  //       timestamp: serverTimestamp(),
+  //     });
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }
+  //   try {
+  //     const formDataCopy = {
+  //       ...data,
+  //       timestamp: serverTimestamp(),
+  //     };
+
+  //     console.log(data);
+  //     const docRef = doc(db, "Items", id);
+  //     await updateDoc(docRef, formDataCopy);
+  //     setLoading(false);
+  //     navigate("/items");
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
   return (
     <>
       <Navigation />
       <Container>
         <h2>Edit Profile</h2>
-        <Form onSubmit={handleProfile}>
+        <Form onSubmit={handleItemSave}>
           <Form.Group className="mb-3">
-            <Form.Label>Cashiers Name</Form.Label>
+            <Form.Label>Item Name</Form.Label>
             <Form.Control
               type="text"
-              name="userFirstname"
               onChange={handleInputChange}
+              name="itemName"
+              value={itemName}
               autoFocus
             />
 
-            <Form.Label>Last Name</Form.Label>
+            <Form.Label>Item Cost</Form.Label>
             <Form.Control
               type="text"
-              name="userLastname"
+              name="itemCost"
               onChange={handleInputChange}
+              value={itemCost}
             />
-            <Form.Label>New Phone Number</Form.Label>
+            <Form.Label>Item Quantity</Form.Label>
             <Form.Control
               type="number"
-              name="userPhoneNumber"
+              name="itemQuantity"
               onChange={handleInputChange}
+              value={itemQuantity}
             />
             <Form.Label>Upload Your Profile Image</Form.Label>
             <Form.Control
@@ -173,18 +233,9 @@ function EditProfile() {
             Save Changes
           </Button>
         </Form>
-        <div>
-          {details.map((val, id) => {
-            return (
-              <p key={id} className="pt-2 ">
-                {val.itemName}
-              </p>
-            );
-          })}
-        </div>
       </Container>
     </>
   );
 }
 
-export default EditProfile;
+export default ChangeItem;

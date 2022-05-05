@@ -1,6 +1,7 @@
 import Navigation from "../components/navigation";
 import { Container, Badge, Row, Col } from "react-bootstrap";
 import Footer from "../components/footer";
+import { DatePicker, Space } from "antd";
 
 import {
   BarChartFill,
@@ -11,11 +12,22 @@ import {
 } from "react-bootstrap-icons";
 
 function Dashboard() {
+  const { RangePicker } = DatePicker;
   return (
     <>
       <Navigation />
       <div className="main-wrapper">
         <Container>
+          <div
+            className="dpicker"
+            style={{ display: "flex", justifyContent: "flex-end" }}
+          >
+            <Row className="mt-3">
+              <Space direction="vertical" size={12}>
+                <RangePicker />
+              </Space>
+            </Row>
+          </div>
           <Row className="mt-3 gap-3 ">
             <h6>
               <Badge className="mt-3">Statistics</Badge>

@@ -82,3 +82,7 @@ code {
 .fill h6 {
   margin-left: 10px;
 }
+.ant-space-item {
+  display: flex;
+  justify-content: "flex-end";
+}

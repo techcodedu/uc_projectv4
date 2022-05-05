@@ -75,9 +75,6 @@ function Signin() {
                   Log In
                 </Button>
               </Form>
-              <div className="w-100 text-center mt-3">
-                <Link to="/forgot-pass">Forgot Password?</Link>
-              </div>
             </Card.Body>
           </Card>
         </div>
