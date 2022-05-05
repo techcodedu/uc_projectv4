@@ -129,6 +129,7 @@ function Items() {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          
           <Container>
             <Row>
               <Col xs={7}>
