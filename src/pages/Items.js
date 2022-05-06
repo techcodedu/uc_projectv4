@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
 import Navigation from "../components/navigation";
 import { Container, Badge, Button, Modal, Row, Col } from "react-bootstrap";
-import { db } from "../firebase.config";
+import { auth, db } from "../firebase.config";
 import { useNavigate } from "react-router-dom";
 import { collectionGroup, doc, onSnapshot } from "firebase/firestore";
 import BootstrapTable from "react-bootstrap-table-next";
 import pagination from "react-bootstrap-table2-paginator";
 import { Link } from "react-router-dom";
 import { Image } from "react-bootstrap-icons";
-
+import { async } from "@firebase/util";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { getDocs, query, collection } from "firebase/firestore";
 // import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 // import { faInfo, faEdit } from "@fortawesome/free-solid-svg-icons";
@@ -19,30 +21,26 @@ function Items() {
   const [modalInfo, setModalInfo] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [show, setShow] = useState(false);
-
+  const [currentUser] = useAuthState(auth);
   const navigate = useNavigate();
-
-  //useffect to fetch items
+  const fetchItem = async () => {
+    if (currentUser != null) {
+      const myQuery = query(collection(db, "Users", currentUser?.uid, "Items"));
+      const querySnapshot = await getDocs(myQuery);
+      let transactionArray = [];
+      querySnapshot.forEach((doc) => {
+        transactionArray.push({ ...doc.data(), id: doc.id });
+      });
+      setItems(transactionArray);
+      console.log(transactionArray);
+    } else {
+      console.log("No user!");
+    }
+  };
   useEffect(() => {
-    setLoading(true);
-    const getItems = onSnapshot(
-      collectionGroup(db, "Items"),
-      (snapshot) => {
-        let list = [];
-        snapshot.docs.forEach((doc) => {
-          list.push({ id: doc.id, ...doc.data() });
-        });
-        setItems(list);
-        setLoading(false);
-      },
-      (error) => {
-        console.log(error);
-      }
-    );
-    return () => {
-      getItems();
-    };
-  }, []);
+    if (loading) return;
+    fetchItem();
+  }, [currentUser, loading]);
 
   //for table
   const columns = [
@@ -129,7 +127,6 @@ function Items() {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          
           <Container>
             <Row>
               <Col xs={7}>
@@ -181,6 +178,7 @@ function Items() {
       </Modal>
     );
   };
+
   return (
     <>
       <Navigation />
@@ -199,6 +197,7 @@ function Items() {
           pagination={pgnate}
           rowEvents={rowEvents}
         />
+
         {show && <ModalContent />}
         {/* {items.length > 0 ? (
             items.map((item) => (

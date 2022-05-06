@@ -1,19 +1,11 @@
 import React, { useEffect, useState } from "react";
 import Navigation from "../components/navigation";
 import { useNavigate, useParams } from "react-router-dom";
-import { Container, Form, Button } from "react-bootstrap";
+import { Container, Form, Button, FormGroup } from "react-bootstrap";
+import { useAuthState } from "react-firebase-hooks/auth";
 
-import {
-  collectionGroup,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  serverTimestamp,
-  updateDoc,
-  where,
-} from "firebase/firestore";
-import { db } from "../firebase.config";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { db, auth } from "../firebase.config";
 import {
   getStorage,
   ref,
@@ -21,64 +13,28 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 
-function EditProfile() {
-  //   const initialState = {
-  //     userFirstname: "",
-  //     userLastname: "",
-  //     userPhoneNumber: "",
-  //   };
-
-  //   const [data, setData] = useState(initialState);
-  //   const { userFirstname, userLastname, userPhoneNumber } = data;
+function ChangeItem() {
   const { id } = useParams();
+  const [currentUser, loading] = useAuthState(auth);
   const navigate = useNavigate();
-
-  const [isSubmit, setIsSubmit] = useState(false);
-
+  const [error, setError] = useState("");
   const [file, setFile] = useState(null);
   const [progress, setProgress] = useState(null);
 
-  const [details, setDetails] = useState([]);
-
-  const fetchItem = async () => {
-    const q = query(
-      collectionGroup(db, "Items"),
-      where("itemBarcode", "==", id)
-    );
-    const querySnapshot = await getDocs(q);
-    const data = querySnapshot.docs.map((doc) => ({
-      // doc.data() is never undefined for query doc snapshots
-      ...doc.data(),
-      id: doc.id,
-    }));
-    setDetails(data);
-  };
-
-  console.log(details);
-
-  useEffect(() => {
-    fetchItem();
-  }, []);
-
-  //fetch user data from profile
-  //   useEffect(() => {
-  //     id && fetchUserProfile();
-  //   }, [id]);
-
-  //   //query snapshot from Users collection
-  //   const fetchUserProfile = async () => {
-  //     const docRef = doc(db, "Users", id);
-  //     const snapshot = await getDoc(docRef);
-  //     if (snapshot.exists()) {
-  //       setData({ ...snapshot.data() });
-  //     }
-  //   };
+  const [details, setDetails] = useState({
+    itemImageURL: "",
+    itemName: "",
+    itemCategory: "",
+    itemCost: "",
+    itemPrice: "",
+    itemQuantity: "",
+  });
 
   //profile image upload useffect
   useEffect(() => {
     const uploadFile = () => {
       const storage = getStorage();
-      var storagePath = "cashier/" + file.name;
+      var storagePath = "items/" + file.name;
       const storageRef = ref(storage, storagePath);
 
       const uploadTask = uploadBytesResumable(storageRef, file);
@@ -105,7 +61,7 @@ function EditProfile() {
         },
         () => {
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            // setData((prev) => ({ ...prev, userProfile: downloadURL }));
+            setDetails((prev) => ({ ...prev, itemImageURL: downloadURL }));
           });
         }
       );
@@ -113,52 +69,109 @@ function EditProfile() {
     file && uploadFile();
   }, [file]);
 
-  const handleInputChange = (e) => {
-    // setData({ ...data, [e.target.name]: e.target.value });
+  //Read user documents and collection
+  //param uid of the current user
+  async function fetchItem(currentUser) {
+    const ref = doc(db, "Users", currentUser?.uid, "Items", id);
+    const docSnap = await getDoc(ref);
+    if (docSnap.exists()) {
+      setDetails(docSnap.data());
+      console.log(docSnap.data());
+    } else {
+      setDetails({});
+    }
+    return () => {
+      setDetails({});
+    };
+  }
+
+  const onChange = (e) => {
+    setDetails((prevState) => ({
+      ...prevState,
+      [e.target.id]: e.target.value,
+    }));
+  };
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      setError("");
+      const ref = doc(db, "Users", currentUser?.uid, "Items", id);
+      await updateDoc(ref, details).then(function () {
+        console.log("Success");
+        navigate("/items");
+      });
+    } catch (error) {
+      setError("Failed to Login", error);
+    }
   };
 
-  //for save changes
-  const handleProfile = async (e) => {
-    // e.preventDefault();
-    // if (id) {
-    //   try {
-    //     await updateDoc(doc(db, "Users", id), {
-    //       ...data,
-    //       timestamp: serverTimestamp(),
-    //     });
-    //   } catch (error) {
-    //     console.log(error);
-    //   }
-    // }
-    // navigate("/profile");
-  };
+  useEffect(() => {
+    if (loading) return;
+    fetchItem(currentUser);
+  }, [currentUser, loading]);
+
   return (
     <>
       <Navigation />
       <Container>
-        <h2>Edit Profile</h2>
-        <Form onSubmit={handleProfile}>
-          <Form.Group className="mb-3">
-            <Form.Label>Cashiers Name</Form.Label>
+        <h2>Edit Items</h2>
+        <Form onSubmit={onSubmit}>
+          <img src={details.itemImageURL} width="200" height="200" />
+          <Form.Group id="itemName" className="mb-3">
+            <Form.Label>Item name</Form.Label>
             <Form.Control
               type="text"
-              name="userFirstname"
-              onChange={handleInputChange}
-              autoFocus
+              onChange={onChange}
+              name="itemName"
+              id="itemName"
+              defaultValue={details.itemName}
             />
+          </Form.Group>
+          <Form.Group className="mb-3" id="itemCategory">
+            <Form.Label>Category</Form.Label>
+            <Form.Control
+              type="text"
+              name="itemCategory"
+              id="itemCategory"
+              onChange={onChange}
+              defaultValue={details.itemCategory}
+            />
+          </Form.Group>
 
-            <Form.Label>Last Name</Form.Label>
-            <Form.Control
-              type="text"
-              name="userLastname"
-              onChange={handleInputChange}
-            />
-            <Form.Label>New Phone Number</Form.Label>
+          <Form.Group className="mb-3" id="itemQuantity">
+            <Form.Label>Quantity</Form.Label>
             <Form.Control
               type="number"
-              name="userPhoneNumber"
-              onChange={handleInputChange}
+              name="itemQuantity"
+              id="itemQuantity"
+              onChange={onChange}
+              defaultValue={details.itemQuantity}
             />
+          </Form.Group>
+
+          <Form.Group className="mb-3" id="itemCost">
+            <Form.Label>Cost</Form.Label>
+            <Form.Control
+              type="number"
+              name="itemCost"
+              id="itemCost"
+              onChange={onChange}
+              defaultValue={details["itemCost"]}
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3" id="itemPrice">
+            <Form.Label>Price</Form.Label>
+            <Form.Control
+              type="number"
+              name="itemPrice"
+              id="itemPrice"
+              onChange={onChange}
+              defaultValue={details.itemPrice}
+            />
+          </Form.Group>
+
+          <Form.Group>
             <Form.Label>Upload Your Profile Image</Form.Label>
             <Form.Control
               type="file"
@@ -173,18 +186,9 @@ function EditProfile() {
             Save Changes
           </Button>
         </Form>
-        <div>
-          {details.map((val, id) => {
-            return (
-              <p key={id} className="pt-2 ">
-                {val.itemName}
-              </p>
-            );
-          })}
-        </div>
       </Container>
     </>
   );
 }
 
-export default EditProfile;
+export default ChangeItem;
