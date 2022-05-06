@@ -199,24 +199,6 @@ function Items() {
         />
 
         {show && <ModalContent />}
-        {/* {items.length > 0 ? (
-            items.map((item) => (
-              <Col span={6}>
-                <Card
-                  hoverable
-                  cover={<img alt="example" src={item.itemImageURL} />}
-                >
-                  <Meta
-                    title="Europe Street beat"
-                    description="www.instagram.com"
-                  />
-                </Card>
-              </Col>
-            ))
-          ) : (
-            <h1>No Data yet</h1>
-          )}
-       */}
       </Container>
     </>
   );

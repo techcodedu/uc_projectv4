@@ -47,7 +47,7 @@ function EditProfile() {
   useEffect(() => {
     const uploadFile = () => {
       const storage = getStorage();
-      var storagePath = "storeimages/" + file.name;
+      var storagePath = "cashier/" + file.name;
       const storageRef = ref(storage, storagePath);
 
       const uploadTask = uploadBytesResumable(storageRef, file);
