@@ -96,7 +96,7 @@ function ChangeItem() {
     try {
       setError("");
       const ref = doc(db, "Users", currentUser?.uid, "Items", id);
-      await updateDoc(ref, details).then(function () {
+      await updateDoc(ref, details).then(function() {
         console.log("Success");
         navigate("/items");
       });
