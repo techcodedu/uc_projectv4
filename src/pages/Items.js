@@ -3,7 +3,7 @@ import Navigation from "../components/navigation";
 import { Container, Badge, Button, Modal, Row, Col } from "react-bootstrap";
 import { auth, db } from "../firebase.config";
 import { useNavigate } from "react-router-dom";
-import { collectionGroup, doc, onSnapshot } from "firebase/firestore";
+import { collectionGroup, doc, getDoc, onSnapshot } from "firebase/firestore";
 import BootstrapTable from "react-bootstrap-table-next";
 import pagination from "react-bootstrap-table2-paginator";
 import { Link } from "react-router-dom";
@@ -23,6 +23,7 @@ function Items() {
   const [show, setShow] = useState(false);
   const [currentUser] = useAuthState(auth);
   const navigate = useNavigate();
+
   const fetchItem = async () => {
     if (currentUser != null) {
       const myQuery = query(collection(db, "Users", currentUser?.uid, "Items"));
@@ -37,6 +38,7 @@ function Items() {
       console.log("No user!");
     }
   };
+
   useEffect(() => {
     if (loading) return;
     fetchItem();
@@ -199,24 +201,7 @@ function Items() {
         />
 
         {show && <ModalContent />}
-        {/* {items.length > 0 ? (
-            items.map((item) => (
-              <Col span={6}>
-                <Card
-                  hoverable
-                  cover={<img alt="example" src={item.itemImageURL} />}
-                >
-                  <Meta
-                    title="Europe Street beat"
-                    description="www.instagram.com"
-                  />
-                </Card>
-              </Col>
-            ))
-          ) : (
-            <h1>No Data yet</h1>
-          )}
-       */}
+    
       </Container>
     </>
   );
