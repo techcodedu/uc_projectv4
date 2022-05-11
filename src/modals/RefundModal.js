@@ -30,17 +30,11 @@ function RefundModal(props) {
       centered
     >
       <Modal.Header closeButton>
-        ess
-        <Modal.Title id="contained-modal-title-vcenter">
-          Modal heading
-        </Modal.Title>
+        <Modal.Title id="contained-modal-title-vcenter">Purchases</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <h4>Centered Modal</h4>
-        <p>{props.uid}</p>
-        <p>{transactionItems?.length}</p>
-        <p>{transaction.transactionID}</p>
-        <p>{transaction.transactionCashier}</p>
+        <h4>Cashier : {transaction.transactionCashier}</h4>
+
         <Table striped bordered hover>
           <thead>
             <tr>
@@ -78,11 +72,12 @@ function RefundModal(props) {
           </tbody>
         </Table>
         <Button
+          className="m3"
           onClick={(e) => {
             updatedPurchases(e, transaction.transactionID, transactionItems);
           }}
         >
-          Save Purchases
+          Save
         </Button>
       </Modal.Body>
       <Modal.Footer></Modal.Footer>
