@@ -19,15 +19,16 @@ function ChangeItem() {
   const navigate = useNavigate();
   const [error, setError] = useState("");
   const [file, setFile] = useState(null);
+  const [quantity, setQuantity] = useState(0);
   const [progress, setProgress] = useState(null);
 
   const [details, setDetails] = useState({
     itemImageURL: "",
     itemName: "",
     itemCategory: "",
-    itemCost: "",
-    itemPrice: "",
-    itemQuantity: "",
+    itemCost: null,
+    itemPrice: null,
+    itemQuantity: null,
   });
 
   //profile image upload useffect
@@ -76,7 +77,6 @@ function ChangeItem() {
     const docSnap = await getDoc(ref);
     if (docSnap.exists()) {
       setDetails(docSnap.data());
-      console.log(docSnap.data());
     } else {
       setDetails({});
     }
@@ -96,7 +96,14 @@ function ChangeItem() {
     try {
       setError("");
       const ref = doc(db, "Users", currentUser?.uid, "Items", id);
-      await updateDoc(ref, details).then(function() {
+      await updateDoc(ref, {
+        itemImageURL: details.itemImageURL,
+        itemName: details.itemName,
+        itemCategory: details.itemCategory,
+        itemCost: parseInt(details.itemCost),
+        itemPrice: parseInt(details.itemPrice),
+        itemQuantity: parseInt(details.itemQuantity),
+      }).then(function () {
         console.log("Success");
         navigate("/items");
       });
@@ -156,7 +163,7 @@ function ChangeItem() {
               name="itemCost"
               id="itemCost"
               onChange={onChange}
-              defaultValue={details["itemCost"]}
+              defaultValue={details.itemCost}
             />
           </Form.Group>
 

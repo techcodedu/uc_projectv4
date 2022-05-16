@@ -290,6 +290,7 @@ function Dashboard() {
       <RefundModal
         show={modalShow}
         onHide={() => setModalShow(false)}
+        setModalShow={setModalShow}
         params={modalInfo}
         uid={currentUser?.uid}
       />

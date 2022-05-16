@@ -4,6 +4,7 @@ import { db, auth } from "../firebase.config";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 
 function RefundModal(props) {
+  const setModalShow = props.setModalShow;
   const transaction = props.params;
   const transactionItems = props.params.transactionItems;
   const [btnColor, setBtnColor] = useState("red");
@@ -38,6 +39,7 @@ function RefundModal(props) {
         <Table striped bordered hover>
           <thead>
             <tr>
+              <th>Count</th>
               <th>Item Name</th>
               <th>Cost</th>
               <th>Price</th>
@@ -75,6 +77,7 @@ function RefundModal(props) {
           className="m3"
           onClick={(e) => {
             updatedPurchases(e, transaction.transactionID, transactionItems);
+            setModalShow(false);
           }}
         >
           Save
