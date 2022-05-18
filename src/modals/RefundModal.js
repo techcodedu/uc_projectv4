@@ -29,6 +29,7 @@ function RefundModal(props) {
       size="lg"
       aria-labelledby="contained-modal-title-vcenter"
       centered
+      scrollable={true}
     >
       <Modal.Header closeButton>
         <Modal.Title id="contained-modal-title-vcenter">Purchases</Modal.Title>
@@ -73,6 +74,7 @@ function RefundModal(props) {
             ))}
           </tbody>
         </Table>
+
         <Button
           className="m3"
           onClick={(e) => {
