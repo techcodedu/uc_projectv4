@@ -4,12 +4,9 @@ import { Container, Row } from "react-bootstrap";
 function Footer() {
   return (
     <>
-      <Container fluid className="footer">
-        <Row>
-          <div>&copy; All Rights Reserved UC_Project 2022</div>
-        </Row>
-      </Container>
-      ;
+      <div class="footer">
+        <p>All Rights Reserved Cash Register 2022</p>
+      </div>
     </>
   );
 }

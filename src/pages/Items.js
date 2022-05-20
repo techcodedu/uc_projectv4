@@ -136,6 +136,7 @@ function Items() {
                   src={modalInfo.itemImageURL}
                   className="img-fluid"
                   width="240px"
+                  height="240px"
                 />
               </Col>
               <Col xs={5}>
@@ -201,7 +202,6 @@ function Items() {
         />
 
         {show && <ModalContent />}
-    
       </Container>
     </>
   );

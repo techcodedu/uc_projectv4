@@ -8,6 +8,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  overflow-y: hidden;
 }
 
 code {
@@ -81,4 +83,34 @@ code {
 }
 .fill h6 {
   margin-left: 10px;
+}
+
+.main-wrapper {
+  height: 100vh;
+}
+
+.footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background-color: white;
+  color: black;
+
+  text-align: center;
+}
+.table-wrapper {
+  overflow-y: scroll;
+  height: 300px;
+  width: 100%;
+}
+
+.dashboard-table {
+  overflow-y: scroll;
+  height: 400px;
+  width: 100%;
+}
+.empty-text {
+  text-align: center;
+  color: blue;
 }

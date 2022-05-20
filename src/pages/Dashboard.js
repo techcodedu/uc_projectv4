@@ -61,14 +61,9 @@ function Dashboard() {
     return date.getTime();
   }
   function formatTimestamp(timestamp) {
-    let current_datetime = new Date(timestamp);
-    let formatted_date =
-      current_datetime.getHours() +
-      "-" +
-      current_datetime.getMinutes() +
-      "-" +
-      current_datetime.getSeconds();
-    return formatted_date;
+    const current_datetime = new Date(timestamp);
+
+    return current_datetime.toLocaleString();
   }
   //Read user transactions
   //param uid of the current user
@@ -86,8 +81,6 @@ function Dashboard() {
         transactionArray.push({ ...doc.data(), id: doc.id });
       });
       setTransactions(transactionArray);
-    } else {
-      console.log("No user!");
     }
   };
 
@@ -193,7 +186,6 @@ function Dashboard() {
       },
     },
   ];
-
   const rowEvents = {
     onClick: (e, row) => {
       setModalInfo(row);
@@ -219,7 +211,9 @@ function Dashboard() {
     if (loading) return;
     getTransactions(moment.valueOf(), moment.valueOf());
   }, [currentUser, loading]);
-
+  const emptyDataMessage = () => {
+    return <h3 className="empty-text">No transaction yet</h3>;
+  };
   return (
     <>
       <Navigation />
@@ -279,7 +273,9 @@ function Dashboard() {
             columns={columns}
             striped
             hover
+            wrapperClasses="dashboard-table"
             condensed
+            noDataIndication={emptyDataMessage}
             pagination={pgnate}
             rowEvents={rowEvents}
           />

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Modal, Button, Table } from "react-bootstrap";
 import { db, auth } from "../firebase.config";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-
+import "../index.css";
 function RefundModal(props) {
   const setModalShow = props.setModalShow;
   const transaction = props.params;
@@ -35,44 +35,46 @@ function RefundModal(props) {
       </Modal.Header>
       <Modal.Body>
         <h4>Cashier : {transaction.transactionCashier}</h4>
-
-        <Table striped bordered hover>
-          <thead>
-            <tr>
-              <th>Count</th>
-              <th>Item Name</th>
-              <th>Cost</th>
-              <th>Price</th>
-            </tr>
-          </thead>
-          <tbody>
-            {transactionItems?.map((purchases, index) => (
-              <tr key={purchases.id}>
-                <td>{index}</td>
-                <td>{purchases["itemPurchasedName"]}</td>
-                <td>{purchases["itemPurchasedCost"]}</td>
-                <td>{purchases["itemPurchasedPrice"]}</td>
-                <td>
-                  {purchases["itemPurchasedIsRefunded"] ? (
-                    <p>Refunded</p>
-                  ) : (
-                    <Button
-                      onClick={() => {
-                        purchases["itemPurchasedIsRefunded"] = true;
-                        btnColor === "red"
-                          ? setBtnColor("green")
-                          : setBtnColor("red");
-                      }}
-                      style={{ color: btnColor }}
-                    >
-                      Refund
-                    </Button>
-                  )}
-                </td>
+        <div className="table-wrapper">
+          <Table striped bordered hover>
+            <thead>
+              <tr>
+                <th>Count</th>
+                <th>Item Name</th>
+                <th>Cost</th>
+                <th>Price</th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
+            </thead>
+            <tbody>
+              {transactionItems?.map((purchases, index) => (
+                <tr key={purchases.id}>
+                  <td>{index}</td>
+                  <td>{purchases["itemPurchasedName"]}</td>
+                  <td>{purchases["itemPurchasedCost"]}</td>
+                  <td>{purchases["itemPurchasedPrice"]}</td>
+                  <td>
+                    {purchases["itemPurchasedIsRefunded"] ? (
+                      <p>Refunded</p>
+                    ) : (
+                      <Button
+                        onClick={() => {
+                          purchases["itemPurchasedIsRefunded"] = true;
+                          btnColor === "red"
+                            ? setBtnColor("green")
+                            : setBtnColor("red");
+                        }}
+                        style={{ color: btnColor }}
+                      >
+                        Refund
+                      </Button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+
         <Button
           className="m3"
           onClick={(e) => {
