@@ -7,16 +7,14 @@ import { collectionGroup, doc, getDoc, onSnapshot } from "firebase/firestore";
 import BootstrapTable from "react-bootstrap-table-next";
 import pagination from "react-bootstrap-table2-paginator";
 import { Link } from "react-router-dom";
-import { Image } from "react-bootstrap-icons";
-import { async } from "@firebase/util";
+
 import { useAuthState } from "react-firebase-hooks/auth";
 import { getDocs, query, collection } from "firebase/firestore";
-// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
-// import { faInfo, faEdit } from "@fortawesome/free-solid-svg-icons";
+import "react-bootstrap-table-next/dist/react-bootstrap-table2.min.css";
 
 function Items() {
   const [items, setItems] = useState([]);
+  const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [modalInfo, setModalInfo] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -35,15 +33,38 @@ function Items() {
       setItems(transactionArray);
       console.log(transactionArray);
     } else {
-      console.log("No user!");
+      console.log("No items!");
     }
   };
+
+  async function getTransactions() {
+    const myQuery = query(
+      collection(db, "Users", currentUser?.uid, "Transaction")
+    );
+    const querySnapshot = await getDocs(myQuery);
+    let transactionArray = [];
+    querySnapshot.forEach((doc) => {
+      transactionArray.push({ ...doc.data(), id: doc.id });
+    });
+    setTransactions(transactionArray);
+  }
+  function computeTransactions(transactionArray, itemID) {
+    let count = 0;
+    transactionArray.map((transaction) => {
+      transaction.transactionItems.map((itemPurchased) => {
+        if (itemPurchased["itemPurchasedID"] == itemID) {
+          count = count + 1;
+        }
+      });
+    });
+    return count;
+  }
 
   useEffect(() => {
     if (loading) return;
     fetchItem();
+    getTransactions();
   }, [currentUser, loading]);
-
   //for table
   const columns = [
     {
@@ -61,6 +82,17 @@ function Items() {
     {
       dataField: "itemCost",
       text: "Cost",
+    },
+    {
+      dataField: "itemQuantity",
+      text: "Stocks",
+    },
+    {
+      dataField: "reorderPoint",
+      text: "Re-order Point",
+      formatter: (rowContent, row) => {
+        return <p>{computeTransactions(transactions, row.id)}</p>;
+      },
     },
     {
       dataField: "itemCategory",
@@ -182,6 +214,14 @@ function Items() {
     );
   };
 
+  const rowStyle = (row, rowIndex) => {
+    let quantity = row["itemQuantity"];
+    let itemID = row["id"];
+    if (quantity < computeTransactions(transactions, itemID)) {
+      return { background: "#E57373" };
+    }
+  };
+
   return (
     <>
       <Navigation />
@@ -197,6 +237,7 @@ function Items() {
           striped
           hover
           condensed
+          rowStyle={rowStyle}
           pagination={pgnate}
           rowEvents={rowEvents}
         />
