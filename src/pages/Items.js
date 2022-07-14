@@ -216,9 +216,11 @@ function Items() {
 
   const rowStyle = (row, rowIndex) => {
     let quantity = row["itemQuantity"];
-    let itemID = row["id"];
-    if (quantity < computeTransactions(transactions, itemID)) {
+
+    if (quantity < 50) {
       return { background: "#E57373" };
+    } else {
+      return { background: "green" };
     }
   };
 
